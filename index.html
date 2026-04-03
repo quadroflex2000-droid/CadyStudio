@@ -10,14 +10,21 @@
         body { font-family: sans-serif; text-align: center; padding: 20px; background-color: var(--tg-theme-bg-color, #ffffff); color: var(--tg-theme-text-color, #000000); }
         button { margin-top: 20px; padding: 10px 20px; font-size: 16px; background-color: var(--tg-theme-button-color, #3390ec); color: var(--tg-theme-button-text-color, #ffffff); border: none; border-radius: 8px; cursor: pointer; }
         #status { margin-top: 20px; font-weight: bold; }
+        #debug { margin-top: 20px; font-size: 12px; color: red; text-align: left; word-break: break-all; }
     </style>
 </head>
 <body>
     <h1 id="greeting">Добро пожаловать!</h1>
     <div id="status">Загрузка...</div>
     <button id="saveBtn" style="display: none;">Зарегистрироваться в БД</button>
+    <div id="debug"></div>
 
     <script>
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            document.getElementById('debug').innerText += `Ошибка: ${msg} (строка ${lineNo})\n`;
+            return false;
+        };
+
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
@@ -30,43 +37,59 @@
 
         const supabaseUrl = 'https://jbnwbtjpkmonwzgtszdw.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpibndidGpwa21vbnd6Z3RzemR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNzE2MDksImV4cCI6MjA5MDc0NzYwOX0.BWhcZBoxgz9BYnfPwGYhrfHbdEniXSpts3fIFR6IQ-I';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        try {
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-        async function checkUser() {
-            if (!user) {
-                document.getElementById('status').innerText = "Откройте приложение внутри Telegram.";
-                return;
-            }
-
-            try {
-                const { data, error } = await supabase.from('users').select('*').eq('id', user.id).single();
-                
-                if (data) {
-                    document.getElementById('status').innerText = "Вы уже есть в базе данных Supabase!";
-                } else {
-                    document.getElementById('status').innerText = "Вас еще нет в базе.";
-                    document.getElementById('saveBtn').style.display = 'inline-block';
+            async function checkUser() {
+                if (!user) {
+                    document.getElementById('status').innerText = "Не удалось получить данные Telegram.";
+                    document.getElementById('debug').innerText += JSON.stringify(tg.initDataUnsafe) + "\n";
+                    return;
                 }
-            } catch (e) {
-                document.getElementById('status').innerText = "Ошибка проверки БД.";
+
+                try {
+                    const { data, error } = await supabase.from('users').select('*').eq('id', user.id);
+                    
+                    if (error) {
+                        document.getElementById('status').innerText = "Ошибка запроса к БД.";
+                        document.getElementById('debug').innerText += JSON.stringify(error) + "\n";
+                        return;
+                    }
+
+                    if (data && data.length > 0) {
+                        document.getElementById('status').innerText = "Вы уже есть в базе данных Supabase!";
+                    } else {
+                        document.getElementById('status').innerText = "Вас еще нет в базе.";
+                        document.getElementById('saveBtn').style.display = 'inline-block';
+                    }
+                } catch (e) {
+                    document.getElementById('status').innerText = "Сбой проверки БД.";
+                    document.getElementById('debug').innerText += e.message + "\n";
+                }
             }
+
+            document.getElementById('saveBtn').addEventListener('click', async () => {
+                const { error } = await supabase.from('users').insert([{ 
+                    id: user.id, 
+                    created_at: new Date().toISOString()
+                }]);
+
+                if (!error) {
+                    document.getElementById('status').innerText = "Вы успешно добавлены в базу!";
+                    document.getElementById('saveBtn').style.display = 'none';
+                    document.getElementById('debug').innerText = "";
+                } else {
+                    document.getElementById('status').innerText = "Ошибка при добавлении.";
+                    document.getElementById('debug').innerText += JSON.stringify(error) + "\n";
+                }
+            });
+
+            checkUser();
+        } catch (err) {
+            document.getElementById('status').innerText = "Сбой инициализации.";
+            document.getElementById('debug').innerText += err.message + "\n";
         }
-
-        document.getElementById('saveBtn').addEventListener('click', async () => {
-            const { error } = await supabase.from('users').insert([{ 
-                id: user.id, 
-                created_at: new Date()
-            }]);
-
-            if (!error) {
-                document.getElementById('status').innerText = "Вы успешно добавлены в базу!";
-                document.getElementById('saveBtn').style.display = 'none';
-            } else {
-                document.getElementById('status').innerText = "Ошибка при добавлении.";
-            }
-        });
-
-        checkUser();
     </script>
 </body>
 </html>
