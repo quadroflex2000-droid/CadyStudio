@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CadyStudio Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <style>
         body { font-family: sans-serif; text-align: center; padding: 20px; }
         #status { margin-top: 20px; font-weight: bold; color: green; }
@@ -19,18 +19,13 @@
         
         const supabaseUrl = 'https://jbnwbtjpkmonwzgtszdw.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpibndidGpwa21vbnd6Z3RzemR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNzE2MDksImV4cCI6MjA5MDc0NzYwOX0.BWhcZBoxgz9BYnfPwGYhrfHbdEniXSpts3fIFR6IQ-I';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-        async function testConnection() {
-            try {
-                const { data, error } = await supabase.from('test_table').select('*').limit(1);
-                document.getElementById('status').innerText = "Supabase успешно подключен!";
-            } catch (e) {
-                document.getElementById('status').innerText = "Supabase готов к работе.";
-            }
-        }
         
-        testConnection();
+        try {
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            document.getElementById('status').innerText = "Supabase готов к работе!";
+        } catch (e) {
+            document.getElementById('status').innerText = "Ошибка: " + e.message;
+        }
     </script>
 </body>
 </html>
