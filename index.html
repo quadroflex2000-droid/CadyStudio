@@ -7,25 +7,66 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; }
-        #status { margin-top: 20px; font-weight: bold; color: green; }
+        body { font-family: sans-serif; text-align: center; padding: 20px; background-color: var(--tg-theme-bg-color, #ffffff); color: var(--tg-theme-text-color, #000000); }
+        button { margin-top: 20px; padding: 10px 20px; font-size: 16px; background-color: var(--tg-theme-button-color, #3390ec); color: var(--tg-theme-button-text-color, #ffffff); border: none; border-radius: 8px; cursor: pointer; }
+        #status { margin-top: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>CadyStudio + Supabase</h1>
-    <div id="status">Подключение к базе данных...</div>
+    <h1 id="greeting">Добро пожаловать!</h1>
+    <div id="status">Загрузка...</div>
+    <button id="saveBtn" style="display: none;">Зарегистрироваться в БД</button>
+
     <script>
-        window.Telegram.WebApp.ready();
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        const user = tg.initDataUnsafe?.user;
         
+        if (user) {
+            document.getElementById('greeting').innerText = `Привет, ${user.first_name}!`;
+        }
+
         const supabaseUrl = 'https://jbnwbtjpkmonwzgtszdw.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpibndidGpwa21vbnd6Z3RzemR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNzE2MDksImV4cCI6MjA5MDc0NzYwOX0.BWhcZBoxgz9BYnfPwGYhrfHbdEniXSpts3fIFR6IQ-I';
-        
-        try {
-            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-            document.getElementById('status').innerText = "Supabase готов к работе!";
-        } catch (e) {
-            document.getElementById('status').innerText = "Ошибка: " + e.message;
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function checkUser() {
+            if (!user) {
+                document.getElementById('status').innerText = "Откройте приложение внутри Telegram.";
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase.from('users').select('*').eq('id', user.id).single();
+                
+                if (data) {
+                    document.getElementById('status').innerText = "Вы уже есть в базе данных Supabase!";
+                } else {
+                    document.getElementById('status').innerText = "Вас еще нет в базе.";
+                    document.getElementById('saveBtn').style.display = 'inline-block';
+                }
+            } catch (e) {
+                document.getElementById('status').innerText = "Ошибка проверки БД.";
+            }
         }
+
+        document.getElementById('saveBtn').addEventListener('click', async () => {
+            const { error } = await supabase.from('users').insert([{ 
+                id: user.id, 
+                created_at: new Date()
+            }]);
+
+            if (!error) {
+                document.getElementById('status').innerText = "Вы успешно добавлены в базу!";
+                document.getElementById('saveBtn').style.display = 'none';
+            } else {
+                document.getElementById('status').innerText = "Ошибка при добавлении.";
+            }
+        });
+
+        checkUser();
     </script>
 </body>
 </html>
