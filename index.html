@@ -3,93 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CadyStudio Mini App</title>
+    <title>Управление Агентами</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; background-color: var(--tg-theme-bg-color, #ffffff); color: var(--tg-theme-text-color, #000000); }
-        button { margin-top: 20px; padding: 10px 20px; font-size: 16px; background-color: var(--tg-theme-button-color, #3390ec); color: var(--tg-theme-button-text-color, #ffffff); border: none; border-radius: 8px; cursor: pointer; }
-        #status { margin-top: 20px; font-weight: bold; }
-        #debug { margin-top: 20px; font-size: 12px; color: red; text-align: left; word-break: break-all; }
+        body { 
+            font-family: sans-serif; 
+            background-color: var(--tg-theme-secondary-bg-color, #f0f2f5); 
+            color: var(--tg-theme-text-color, #000000); 
+            margin: 0; 
+            padding: 15px; 
+        }
+        h1 { text-align: center; font-size: 20px; margin-bottom: 20px; }
+        .section { margin-bottom: 25px; }
+        .section-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: var(--tg-theme-link-color, #3390ec); border-bottom: 2px solid var(--tg-theme-link-color, #3390ec); padding-bottom: 5px;}
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
+        .card { 
+            background-color: var(--tg-theme-bg-color, #ffffff); 
+            border-radius: 12px; 
+            padding: 15px 10px; 
+            text-align: center; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .avatar { width: 64px; height: 64px; border-radius: 50%; margin-bottom: 10px; background-color: #e2e8f0; overflow: hidden; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .name { font-size: 14px; font-weight: bold; margin-bottom: 4px; }
+        .role { font-size: 11px; color: var(--tg-theme-hint-color, #888888); }
     </style>
 </head>
 <body>
-    <h1 id="greeting">Добро пожаловать!</h1>
-    <div id="status">Загрузка...</div>
-    <button id="saveBtn" style="display: none;">Зарегистрироваться в БД</button>
-    <div id="debug"></div>
+    <h1 id="greeting">Центр Управления</h1>
+
+    <div class="section">
+        <div class="section-title">Главные Направления</div>
+        <div class="grid">
+            <div class="card">
+                <div class="avatar"><img src="https://api.dicebear.com/7.x/bottts/svg?seed=Cady&backgroundColor=c0aede" alt="Cady"></div>
+                <div class="name">Cady</div>
+                <div class="role">Linear & SaaS</div>
+            </div>
+            <div class="card">
+                <div class="avatar"><img src="https://api.dicebear.com/7.x/bottts/svg?seed=Bitrix&backgroundColor=ffdfbf" alt="Bitrix"></div>
+                <div class="name">BiMax</div>
+                <div class="role">Фабрика Bitrix</div>
+            </div>
+            <div class="card">
+                <div class="avatar"><img src="https://api.dicebear.com/7.x/bottts/svg?seed=Shopify&backgroundColor=b6e3f4" alt="Shopify"></div>
+                <div class="name">Shopify</div>
+                <div class="role">Магазин Мебели</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Общие Сервисы (Медиа & Код)</div>
+        <div class="grid">
+            <div class="card">
+                <div class="avatar"><img src="https://api.dicebear.com/7.x/bottts/svg?seed=CodeMax&backgroundColor=c0aede" alt="CodeMax"></div>
+                <div class="name">CodeMax</div>
+                <div class="role">Разработка</div>
+            </div>
+            <div class="card">
+                <div class="avatar"><img src="https://api.dicebear.com/7.x/bottts/svg?seed=Brainy&backgroundColor=ffdfbf" alt="Brainy"></div>
+                <div class="name">Brainy</div>
+                <div class="role">Сценарии</div>
+            </div>
+            <div class="card">
+                <div class="avatar"><img src="https://api.dicebear.com/7.x/bottts/svg?seed=Picasso&backgroundColor=b6e3f4" alt="Picasso"></div>
+                <div class="name">Picasso</div>
+                <div class="role">Визуал</div>
+            </div>
+            <div class="card">
+                <div class="avatar"><img src="https://api.dicebear.com/7.x/bottts/svg?seed=Cutter&backgroundColor=c0aede" alt="Cutter"></div>
+                <div class="name">Cutter</div>
+                <div class="role">Монтаж</div>
+            </div>
+            <div class="card">
+                <div class="avatar"><img src="https://api.dicebear.com/7.x/bottts/svg?seed=Vox&backgroundColor=ffdfbf" alt="Vox"></div>
+                <div class="name">Vox</div>
+                <div class="role">Озвучка</div>
+            </div>
+            <div class="card">
+                <div class="avatar"><img src="https://api.dicebear.com/7.x/bottts/svg?seed=Postman&backgroundColor=b6e3f4" alt="Postman"></div>
+                <div class="name">Postman</div>
+                <div class="role">Соцсети</div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        window.onerror = function(msg, url, lineNo, columnNo, error) {
-            document.getElementById('debug').innerText += `Ошибка: ${msg} (строка ${lineNo})\n`;
-            return false;
-        };
-
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-
         const user = tg.initDataUnsafe?.user;
-        
-        if (user) {
-            document.getElementById('greeting').innerText = `Привет, ${user.first_name}!`;
-        }
-
-        const supabaseUrl = 'https://jbnwbtjpkmonwzgtszdw.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpibndidGpwa21vbnd6Z3RzemR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNzE2MDksImV4cCI6MjA5MDc0NzYwOX0.BWhcZBoxgz9BYnfPwGYhrfHbdEniXSpts3fIFR6IQ-I';
-        
-        try {
-            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-            async function checkUser() {
-                if (!user) {
-                    document.getElementById('status').innerText = "Не удалось получить данные Telegram.";
-                    document.getElementById('debug').innerText += JSON.stringify(tg.initDataUnsafe) + "\n";
-                    return;
-                }
-
-                try {
-                    const { data, error } = await supabase.from('users').select('*').eq('id', user.id);
-                    
-                    if (error) {
-                        document.getElementById('status').innerText = "Ошибка запроса к БД.";
-                        document.getElementById('debug').innerText += JSON.stringify(error) + "\n";
-                        return;
-                    }
-
-                    if (data && data.length > 0) {
-                        document.getElementById('status').innerText = "Вы уже есть в базе данных Supabase!";
-                    } else {
-                        document.getElementById('status').innerText = "Вас еще нет в базе.";
-                        document.getElementById('saveBtn').style.display = 'inline-block';
-                    }
-                } catch (e) {
-                    document.getElementById('status').innerText = "Сбой проверки БД.";
-                    document.getElementById('debug').innerText += e.message + "\n";
-                }
-            }
-
-            document.getElementById('saveBtn').addEventListener('click', async () => {
-                const { error } = await supabase.from('users').insert([{ 
-                    id: user.id, 
-                    created_at: new Date().toISOString()
-                }]);
-
-                if (!error) {
-                    document.getElementById('status').innerText = "Вы успешно добавлены в базу!";
-                    document.getElementById('saveBtn').style.display = 'none';
-                    document.getElementById('debug').innerText = "";
-                } else {
-                    document.getElementById('status').innerText = "Ошибка при добавлении.";
-                    document.getElementById('debug').innerText += JSON.stringify(error) + "\n";
-                }
-            });
-
-            checkUser();
-        } catch (err) {
-            document.getElementById('status').innerText = "Сбой инициализации.";
-            document.getElementById('debug').innerText += err.message + "\n";
-        }
+        if (user) document.getElementById('greeting').innerText = `Штаб: ${user.first_name}`;
     </script>
 </body>
 </html>
